@@ -56,6 +56,27 @@ function testElixir(): boolean {
   }
 }
 
+function detectConflictingExtension(extensionId: string): void {
+  const extension = vscode.extensions.getExtension(extensionId);
+  if (extension) {
+    vscode.window.showErrorMessage('Warning: ' + extensionId + ' is not compatible with ElixirLS, please uninstall ' + extensionId);
+  }
+}
+
+function copyDebugInfo(): void {
+  const elixirVersion = execSync(`elixir --version`);
+  const extension = vscode.extensions.getExtension('jakebecker.elixir-ls');
+
+  const message = `
+  * Elixir & Erlang versions (elixir --version): ${elixirVersion}
+  * VSCode ElixirLS version: ${extension.packageJSON.version}
+  * Operating System Version: ${os.platform()} ${os.release()}
+  `
+
+  vscode.window.showInformationMessage(`Copied to clipboard: ${message}`);
+  vscode.env.clipboard.writeText(message);
+}
+
 export let languageClient: LanguageClient;
 
 export function activate(context: ExtensionContext): void {
@@ -123,25 +144,4 @@ export function deactivate(): Thenable<void> | undefined {
     return undefined;
   }
   return languageClient.stop();
-}
-
-function detectConflictingExtension(extensionId: string) {
-  const extension = vscode.extensions.getExtension(extensionId);
-  if (extension) {
-    vscode.window.showErrorMessage('Warning: ' + extensionId + ' is not compatible with ElixirLS, please uninstall ' + extensionId);
-  }
-}
-
-function copyDebugInfo() {
-  const elixirVersion = execSync(`elixir --version`);
-  const extension = vscode.extensions.getExtension('jakebecker.elixir-ls');
-
-  const message = `
-  * Elixir & Erlang versions (elixir --version): ${elixirVersion}
-  * VSCode ElixirLS version: ${extension.packageJSON.version}
-  * Operating System Version: ${os.platform()} ${os.release()}
-  `
-
-  vscode.window.showInformationMessage(`Copied to clipboard: ${message}`);
-  vscode.env.clipboard.writeText(message);
 }
